@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureCloud GRC Platform — Azure Risk Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #0a1628;
+  --navy-mid:    #0e1e38;
+  --navy-light:  #162844;
+  --navy-border: #1e3a5f;
+  --blue-accent: #1464a0;
+  --blue-bright: #1a7fcf;
+  --blue-hover:  #2490e0;
+  --sky:         #e8f4fd;
+  --white:       #ffffff;
+  --gray-100:    #f4f6f9;
+  --gray-200:    #e2e8f0;
+  --gray-300:    #c8d4e3;
+  --gray-400:    #8fa3be;
+  --gray-500:    #5a7394;
+  --gray-600:    #3d5269;
+  --text-primary:   #0d1f35;
+  --text-secondary: #3d5269;
+  --text-muted:     #7a92ab;
+  --critical: #c0392b;
+  --critical-bg: #fdf0ef;
+  --critical-border: #e8a09a;
+  --high:     #d4520a;
+  --high-bg:  #fdf3eb;
+  --high-border: #f0b584;
+  --medium:   #b8860b;
+  --medium-bg: #fdf8e6;
+  --medium-border: #e8d080;
+  --low:      #1a7a4a;
+  --low-bg:   #edf7f2;
+  --low-border: #80cba4;
+  --sidebar-w: 220px;
+  --topbar-h:  54px;
+  --font: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --radius: 4px;
+  --shadow-sm: 0 1px 3px rgba(10,22,40,0.08);
+  --shadow-md: 0 2px 8px rgba(10,22,40,0.12);
+  --shadow-lg: 0 4px 20px rgba(10,22,40,0.16);
+}
+
+html, body { height: 100%; font-family: var(--font); font-size: 14px; color: var(--text-primary); background: var(--gray-100); }
+
+/* ── TOPBAR ─────────────────────────────────────────────── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--navy);
+  border-bottom: 1px solid var(--navy-border);
+  display: flex; align-items: center;
+  padding: 0 20px;
+  z-index: 200;
+  gap: 0;
+}
+
+.topbar-logo {
+  display: flex; align-items: center; gap: 10px;
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+}
+
+.logo-mark {
+  width: 30px; height: 30px;
+  background: var(--blue-bright);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+  border-radius: 3px;
+  letter-spacing: -0.5px;
+}
+
+.logo-text { color: #fff; font-size: 13px; font-weight: 600; line-height: 1.2; }
+.logo-text span { display: block; font-size: 10px; font-weight: 400; color: var(--gray-400); letter-spacing: 0.5px; text-transform: uppercase; }
+
+.topbar-center { flex: 1; display: flex; align-items: center; gap: 8px; padding: 0 20px; }
+
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-400); }
+.breadcrumb .sep { color: var(--gray-500); }
+.breadcrumb .current { color: var(--gray-200); font-weight: 500; }
+
+.topbar-right { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+
+.topbar-pill {
+  background: var(--navy-light);
+  border: 1px solid var(--navy-border);
+  color: var(--gray-300);
+  padding: 4px 10px; border-radius: 3px;
+  font-size: 11px; font-weight: 500;
+  display: flex; align-items: center; gap: 5px;
+}
+
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.user-badge {
+  width: 30px; height: 30px;
+  background: var(--blue-accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  cursor: pointer;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar {
+  position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--navy-mid);
+  border-right: 1px solid var(--navy-border);
+  overflow-y: auto;
+  z-index: 100;
+  display: flex; flex-direction: column;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--navy-border); border-radius: 2px; }
+
+.sidebar-section { padding: 16px 0 8px; }
+
+.sidebar-section-label {
+  padding: 0 16px 6px;
+  font-size: 10px; font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: var(--gray-400);
+  font-size: 13px; font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(--gray-200); }
+
+.nav-item.active {
+  background: rgba(26,127,207,0.12);
+  color: #fff;
+  border-left-color: var(--blue-bright);
+  font-weight: 500;
+}
+
+.nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--critical);
+  color: #fff;
+  font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px;
+}
+
+.sidebar-divider { height: 1px; background: var(--navy-border); margin: 8px 16px; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: 1px solid var(--navy-border);
+  font-size: 11px; color: var(--gray-500);
+}
+
+.sidebar-footer strong { display: block; color: var(--gray-300); margin-bottom: 2px; }
+
+/* ── MAIN CONTENT ───────────────────────────────────────── */
+.main {
+  margin-left: var(--sidebar-w);
+  margin-top: var(--topbar-h);
+  min-height: calc(100vh - var(--topbar-h));
+  padding: 24px;
+}
+
+.page { display: none; animation: pg-in 0.2s ease; }
+.page.active { display: block; }
+@keyframes pg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── PAGE HEADER ───────────────────────────────────────── */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.page-title h1 { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+.page-title p { font-size: 12px; color: var(--text-muted); }
+
+.page-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ── BUTTONS ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; border: 1px solid transparent;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.btn-primary { background: var(--blue-bright); color: #fff; border-color: var(--blue-bright); }
+.btn-primary:hover { background: var(--blue-hover); border-color: var(--blue-hover); }
+
+.btn-secondary { background: #fff; color: var(--text-secondary); border-color: var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-100); border-color: var(--gray-400); }
+
+.btn-ghost { background: transparent; color: var(--text-secondary); border-color: transparent; }
+.btn-ghost:hover { background: var(--gray-200); }
+
+.btn-danger { background: var(--critical); color: #fff; border-color: var(--critical); font-size: 11px; padding: 4px 10px; }
+.btn-danger:hover { background: #a93226; }
+
+.btn-sm { font-size: 12px; padding: 5px 10px; }
+
+/* ── CARDS ──────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+}
+
+.card-header {
+  display: flex; align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--gray-200);
+  gap: 10px;
+}
+
+.card-header h2 { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.card-header .subtitle { font-size: 12px; color: var(--text-muted); margin-left: 4px; }
+.card-header .ml-auto { margin-left: auto; }
+
+.card-body { padding: 18px; }
+
+/* ── STAT CARDS ─────────────────────────────────────────── */
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+
+@media (max-width: 900px) { .stat-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px) { .stat-row { grid-template-columns: 1fr 1fr; } }
+
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  border-top: 3px solid var(--blue-bright);
+}
+
+.stat-card.critical-card { border-top-color: var(--critical); }
+.stat-card.high-card { border-top-color: var(--high); }
+.stat-card.medium-card { border-top-color: var(--medium); }
+.stat-card.low-card { border-top-color: var(--low); }
+
+.stat-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
+.stat-meta { font-size: 11px; color: var(--text-muted); }
+
+/* ── FORMS ──────────────────────────────────────────────── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 700px) { .form-grid, .form-grid-3 { grid-template-columns: 1fr; } }
+.col-span-2 { grid-column: 1 / -1; }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+
+.form-label {
+  font-size: 12px; font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.form-required { color: var(--critical); margin-left: 2px; }
+
+.form-control {
+  background: #fff;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  padding: 7px 10px;
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+
+.form-control:focus {
+  border-color: var(--blue-bright);
+  box-shadow: 0 0 0 3px rgba(26,127,207,0.12);
+}
+
+.form-control::placeholder { color: var(--gray-400); }
+
+textarea.form-control { resize: vertical; min-height: 74px; }
+
+.form-hint { font-size: 11px; color: var(--text-muted); }
+
+.form-footer {
+  display: flex; gap: 8px; margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-200);
+}
+
+/* ── TABLES ─────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+thead th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  background: var(--gray-100);
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--gray-200);
+  vertical-align: middle;
+  color: var(--text-primary);
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--sky); }
+
+.cell-primary { font-weight: 500; color: var(--text-primary); }
+.cell-secondary { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── BADGES ─────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 3px;
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.3px;
+  border: 1px solid transparent;
+}
+
+.badge-critical { background: var(--critical-bg); color: var(--critical); border-color: var(--critical-border); }
+.badge-high     { background: var(--high-bg); color: var(--high); border-color: var(--high-border); }
+.badge-medium   { background: var(--medium-bg); color: var(--medium); border-color: var(--medium-border); }
+.badge-low      { background: var(--low-bg); color: var(--low); border-color: var(--low-border); }
+.badge-info     { background: var(--sky); color: var(--blue-accent); border-color: #b0d0ec; }
+.badge-neutral  { background: var(--gray-100); color: var(--gray-600); border-color: var(--gray-300); }
+
+/* ── RISK MATRIX ─────────────────────────────────────────── */
+.matrix-container { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+
+.matrix-grid-wrap { flex: 1; min-width: 260px; }
+
+.matrix-y-label {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.matrix-y-axis {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;
+}
+
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 28px repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr) 28px;
+  gap: 3px;
+  width: 100%; max-width: 340px;
+}
+
+.mx-label {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-muted); font-weight: 500;
+}
+
+.mx-cell {
+  height: 44px;
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600;
+  cursor: default;
+  border: 1px solid transparent;
+  transition: transform 0.1s;
+}
+
+.mx-cell:hover { transform: scale(1.04); z-index: 1; position: relative; }
+
+.mx-low      { background: #e8f5ee; border-color: #a8d4b8; color: var(--low); }
+.mx-medium   { background: #fdf8e6; border-color: #e8d080; color: var(--medium); }
+.mx-high     { background: #fdf3eb; border-color: #f0b584; color: var(--high); }
+.mx-critical { background: #fdf0ef; border-color: #e8a09a; color: var(--critical); }
+
+.mx-cell.populated { box-shadow: inset 0 0 0 2px rgba(0,0,0,0.15); }
+
+.matrix-legend { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ── CONTROLS ───────────────────────────────────────────── */
+.control-table tbody tr td:first-child { padding-left: 12px; }
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 36px; height: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle input { opacity: 0; width: 0; height: 0; }
+
+.toggle-track {
+  position: absolute; inset: 0;
+  background: var(--gray-300);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle input:checked + .toggle-track { background: var(--blue-bright); }
+.toggle input:checked + .toggle-track::after { left: 19px; }
+
+/* ── PROGRESS BARS ──────────────────────────────────────── */
+.prog-bar-wrap { margin-bottom: 12px; }
+.prog-bar-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+.prog-bar-label { font-weight: 500; color: var(--text-primary); }
+.prog-bar-pct { color: var(--text-muted); font-family: var(--font-mono); }
+
+.prog-bar {
+  height: 7px; background: var(--gray-200);
+  border-radius: 4px; overflow: hidden;
+}
+
+.prog-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+/* ── FRAMEWORK TABS ─────────────────────────────────────── */
+.fw-tabs {
+  display: flex; border-bottom: 1px solid var(--gray-200);
+  margin-bottom: 16px; overflow-x: auto;
+}
+
+.fw-tab {
+  padding: 9px 16px; font-size: 12px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px; white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.fw-tab:hover { color: var(--text-primary); }
+.fw-tab.active { color: var(--blue-bright); border-bottom-color: var(--blue-bright); font-weight: 600; }
+
+/* ── FINDINGS ───────────────────────────────────────────── */
+.finding {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.finding-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: var(--gray-100);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.finding-body { padding: 12px 14px; }
+
+.finding-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.finding-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.remediation-block {
+  background: var(--sky);
+  border: 1px solid #b0d0ec;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+
+.remediation-block .label {
+  font-size: 10px; font-weight: 700;
+  color: var(--blue-accent);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+
+.remediation-steps { font-size: 12px; color: var(--text-secondary); line-height: 1.7; }
+
+/* ── AI CHAT ────────────────────────────────────────────── */
+.chat-container {
+  display: flex; flex-direction: column;
+  height: 340px;
+}
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 2px; }
+
+.msg { max-width: 82%; }
+
+.msg-user {
+  align-self: flex-end;
+  background: var(--blue-bright);
+  color: #fff;
+  border-radius: 10px 10px 2px 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.msg-ai {
+  align-self: flex-start;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 2px 10px 10px 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.55;
+}
+
+.msg-ai .msg-label {
+  font-size: 10px; font-weight: 700;
+  color: var(--blue-accent);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.chat-input-area {
+  border-top: 1px solid var(--gray-200);
+  padding: 10px 12px;
+  display: flex; gap: 8px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  font-family: var(--font); font-size: 13px;
+  color: var(--text-primary); outline: none;
+}
+
+.chat-input-area input:focus {
+  border-color: var(--blue-bright);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(26,127,207,0.1);
+}
+
+.quick-prompts { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px 0; }
+
+.q-chip {
+  padding: 4px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 500;
+  background: var(--sky); color: var(--blue-accent);
+  border: 1px solid #b0d0ec;
+  cursor: pointer; transition: all 0.15s;
+}
+
+.q-chip:hover { background: #d4eaf9; }
+
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.empty-state {
+  text-align: center; padding: 36px 20px;
+  color: var(--text-muted);
+}
+
+.empty-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.5; }
+.empty-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+.empty-sub { font-size: 12px; }
+
+/* ── INLINE TAGS ─────────────────────────────────────────── */
+.inline-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 7px; border-radius: 3px;
+  font-size: 11px; background: var(--gray-100);
+  color: var(--text-secondary); border: 1px solid var(--gray-200);
+}
+
+/* ── SCORE WIDGET ────────────────────────────────────────── */
+.score-widget {
+  display: flex; align-items: center; gap: 20px;
+  padding: 16px;
+  background: var(--navy);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.score-circle {
+  width: 72px; height: 72px; flex-shrink: 0;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  border: 3px solid var(--navy-border);
+}
+
+.score-circle .score-num { font-size: 22px; font-weight: 700; color: #fff; line-height: 1; }
+.score-circle .score-unit { font-size: 10px; color: var(--gray-400); }
+
+.score-info { flex: 1; }
+.score-info .score-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.score-info .score-sub { font-size: 12px; color: var(--gray-400); }
+
+.score-bars { flex: 2; min-width: 160px; }
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.divider { height: 1px; background: var(--gray-200); margin: 16px 0; }
+
+/* ── SECTION TITLE ───────────────────────────────────────── */
+.section-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.7px;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
+
+/* ── TYPING INDICATOR ────────────────────────────────────── */
+.typing span {
+  display: inline-block; width: 5px; height: 5px;
+  border-radius: 50%; background: var(--gray-400);
+  margin: 0 1px; animation: bounce 1.2s infinite;
+}
+
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+
+/* ── OVERVIEW GRID ───────────────────────────────────────── */
+.overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .overview-grid { grid-template-columns: 1fr; } }
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root { --sidebar-w: 0px; }
+  .sidebar { transform: translateX(-220px); width: 220px; }
+  .main { margin-left: 0; padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-mark">SC</div>
+    <div class="logo-text">SecureCloud GRC
+      <span>Enterprise Platform v3.2</span>
+    </div>
+  </div>
+  <div class="topbar-center">
+    <div class="breadcrumb">
+      <span>GRC Management</span>
+      <span class="sep">/</span>
+      <span>Azure Cloud</span>
+      <span class="sep">/</span>
+      <span class="current">Risk Assessment</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-pill"><div class="live-dot"></div>Session Active</div>
+    <div class="topbar-pill">FY2026 — Q2</div>
+    <div class="user-badge">AG</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Assessment Workflow</div>
+    <div class="nav-item active" onclick="navigate(0, this)">
+      <span class="nav-icon">▦</span> Asset Inventory
+    </div>
+    <div class="nav-item" onclick="navigate(1, this)">
+      <span class="nav-icon">◈</span> Risk Modeling
+      <span class="nav-badge" id="riskNavBadge" style="display:none"></span>
+    </div>
+    <div class="nav-item" onclick="navigate(2, this)">
+      <span class="nav-icon">⊞</span> Control Mapping
+    </div>
+    <div class="nav-item" onclick="navigate(3, this)">
+      <span class="nav-icon">≡</span> Compliance
+    </div>
+    <div class="nav-item" onclick="navigate(4, this)">
+      <span class="nav-icon">◉</span> Report & Findings
+    </div>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Tools</div>
+    <div class="nav-item" onclick="navigate(5, this)">
+      <span class="nav-icon">⌘</span> AI Security Advisor
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <strong>Azure — East US</strong>
+    Subscription: Corp-Prod-001<br>
+    Last scan: Today 09:41
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ① ASSET INVENTORY -->
+  <div class="page active" id="page-0">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Asset Inventory</h1>
+        <p>Register and classify Azure cloud assets within scope of this assessment</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary btn-sm" onclick="loadSampleAssets()">Load Sample Environment</button>
+        <button class="btn btn-primary btn-sm" onclick="scrollToForm()">+ Add Asset</button>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Assets</div>
+        <div class="stat-value" id="s-total">0</div>
+        <div class="stat-meta">In scope</div>
+      </div>
+      <div class="stat-card critical-card">
+        <div class="stat-label">Internet Exposed</div>
+        <div class="stat-value" id="s-exposed">0</div>
+        <div class="stat-meta">Public or partial</div>
+      </div>
+      <div class="stat-card high-card">
+        <div class="stat-label">Production</div>
+        <div class="stat-value" id="s-prod">0</div>
+        <div class="stat-meta">Live workloads</div>
+      </div>
+      <div class="stat-card medium-card">
+        <div class="stat-label">Sensitive Data</div>
+        <div class="stat-value" id="s-sensitive">0</div>
+        <div class="stat-meta">PII / Confidential</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Registered Assets</h2>
+        <span class="subtitle" id="assetCountLabel">— 0 records</span>
+        <div class="ml-auto"></div>
+      </div>
+      <div id="assetTableWrap">
+        <div class="empty-state">
+          <div class="empty-icon">☁</div>
+          <div class="empty-title">No assets registered</div>
+          <div class="empty-sub">Add assets using the form below or load the sample Azure environment</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="addAssetForm">
+      <div class="card-header">
+        <h2>Register New Asset</h2>
+        <span class="subtitle">All fields marked * are required</span>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Asset Name <span class="form-required">*</span></label>
+            <input class="form-control" id="assetName" placeholder="e.g. prod-api-vm-001">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Asset Type <span class="form-required">*</span></label>
+            <select class="form-control" id="assetType">
+              <option value="">— Select —</option>
+              <option>Virtual Machine</option>
+              <option>Azure SQL Database</option>
+              <option>Storage Account</option>
+              <option>App Service</option>
+              <option>Key Vault</option>
+              <option>Azure Kubernetes Service</option>
+              <option>Azure Active Directory</option>
+              <option>Virtual Network</option>
+              <option>API Management</option>
+              <option>Azure Functions</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Environment</label>
+            <select class="form-control" id="assetEnv">
+              <option>Production</option><option>Staging</option>
+              <option>Development</option><option>DR / Backup</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data Classification</label>
+            <select class="form-control" id="assetClass">
+              <option>Public</option><option>Internal</option>
+              <option>Confidential</option><option>Restricted / PII</option><option>Secret</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Azure Region</label>
+            <select class="form-control" id="assetRegion">
+              <option>East US</option><option>West US 2</option>
+              <option>North Europe</option><option>West Europe</option>
+              <option>Southeast Asia</option><option>UK South</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Internet Exposure</label>
+            <select class="form-control" id="assetExposed">
+              <option value="Yes">Yes — Public IP</option>
+              <option value="No">No — Private only</option>
+              <option value="Partial">Partial — Behind LB/WAF</option>
+            </select>
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label">Description / Notes</label>
+            <textarea class="form-control" id="assetNotes" placeholder="Asset purpose, dependencies, known issues..."></textarea>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="btn btn-primary" onclick="addAsset()">Register Asset</button>
+          <button class="btn btn-secondary" onclick="clearAssetForm()">Clear Form</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② RISK MODELING -->
+  <div class="page" id="page-1">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Risk Modeling</h1>
+        <p>Identify and quantify threats against registered assets using likelihood × impact scoring</p>
+      </div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="card">
+        <div class="card-header"><h2>Log New Risk Entry</h2></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Target Asset <span class="form-required">*</span></label>
+              <select class="form-control" id="riskAsset"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Threat Category</label>
+              <select class="form-control" id="riskThreat">
+                <option>Data Exfiltration</option>
+                <option>Unauthorized Access</option>
+                <option>Ransomware / Malware</option>
+                <option>DDoS Attack</option>
+                <option>Insider Threat</option>
+                <option>Misconfiguration</option>
+                <option>Supply Chain Attack</option>
+                <option>Credential Stuffing</option>
+                <option>Privilege Escalation</option>
+                <option>API Abuse</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Likelihood (1–5)</label>
+              <select class="form-control" id="riskLikelihood">
+                <option value="1">1 — Rare</option>
+                <option value="2">2 — Unlikely</option>
+                <option value="3" selected>3 — Possible</option>
+                <option value="4">4 — Likely</option>
+                <option value="5">5 — Almost Certain</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Impact (1–5)</label>
+              <select class="form-control" id="riskImpact">
+                <option value="1">1 — Negligible</option>
+                <option value="2">2 — Minor</option>
+                <option value="3" selected>3 — Moderate</option>
+                <option value="4">4 — Major</option>
+                <option value="5">5 — Catastrophic</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Attack Vector</label>
+              <select class="form-control" id="riskVector">
+                <option>Network</option>
+                <option>Application Layer</option>
+                <option>Identity / IAM</option>
+                <option>Physical</option>
+                <option>Social Engineering</option>
+                <option>API / Integration</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Existing Controls</label>
+              <select class="form-control" id="riskControl">
+                <option>None</option>
+                <option>Partial</option>
+                <option>MFA Enabled</option>
+                <option>WAF + DDoS Protection</option>
+                <option>Encryption at Rest</option>
+                <option>RBAC + Conditional Access</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-footer">
+            <button class="btn btn-primary" onclick="addRisk()">Add to Register</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Risk Heat Matrix</h2><span class="subtitle">Likelihood × Impact</span></div>
+        <div class="card-body">
+          <div class="matrix-y-label">
+            <div class="matrix-y-axis">Impact ↑</div>
+            <div class="matrix-grid" id="riskMatrix"></div>
+          </div>
+          <div style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:4px; font-weight:500;">Likelihood →</div>
+          <div class="matrix-legend" style="margin-top:10px;">
+            <span class="badge badge-low">Low (1–4)</span>
+            <span class="badge badge-medium">Medium (5–9)</span>
+            <span class="badge badge-high">High (10–16)</span>
+            <span class="badge badge-critical">Critical (17–25)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Risk Register</h2>
+        <span class="subtitle" id="riskCountLabel">— 0 records</span>
+      </div>
+      <div id="riskTableWrap">
+        <div class="empty-state">
+          <div class="empty-icon">◈</div>
+          <div class="empty-title">No risks logged</div>
+          <div class="empty-sub">Register assets in Phase 1, then model threats above</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ CONTROL MAPPING -->
+  <div class="page" id="page-2">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Security Control Mapping</h1>
+        <p>Activate controls to simulate your Azure security posture and reduce residual risk</p>
+      </div>
+    </div>
+
+    <div class="score-widget" id="scoreWidget">
+      <div class="score-circle" id="scoreCircle" style="border-color:#2ecc71">
+        <div class="score-num" id="scoreNum">0%</div>
+        <div class="score-unit">Posture</div>
+      </div>
+      <div class="score-info">
+        <div class="score-title" id="scoreTitleText">Security Posture Score</div>
+        <div class="score-sub" id="scoreSubText">Enable controls to improve your score</div>
+      </div>
+      <div class="score-bars" id="scoreBars"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Azure Security Controls</h2><span class="subtitle">Toggle to enable / disable</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Control Name</th>
+              <th>Description</th>
+              <th>MITRE Ref</th>
+              <th>Impact</th>
+              <th style="text-align:center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="controlTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ COMPLIANCE -->
+  <div class="page" id="page-3">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Compliance Framework Mapping</h1>
+        <p>Evaluate control coverage against industry frameworks and identify exposure gaps</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Framework Coverage Analysis</h2></div>
+      <div class="card-body">
+        <div class="fw-tabs" id="fwTabs">
+          <div class="fw-tab active" onclick="selectFw('NIST CSF', this)">NIST CSF</div>
+          <div class="fw-tab" onclick="selectFw('ISO 27001', this)">ISO 27001</div>
+          <div class="fw-tab" onclick="selectFw('SOC 2', this)">SOC 2</div>
+          <div class="fw-tab" onclick="selectFw('CIS Azure', this)">CIS Azure</div>
+          <div class="fw-tab" onclick="selectFw('GDPR', this)">GDPR</div>
+          <div class="fw-tab" onclick="selectFw('PCI DSS', this)">PCI DSS</div>
+        </div>
+        <div id="fwContent"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>Exposure Gap Analysis</h2></div>
+      <div class="card-body" id="gapContent"></div>
+    </div>
+  </div>
+
+  <!-- ⑤ REPORT -->
+  <div class="page" id="page-4">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Risk Assessment Report</h1>
+        <p>Executive summary of findings, severity distribution, and remediation guidance</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary btn-sm" onclick="window.print()">Export PDF</button>
+      </div>
+    </div>
+
+    <div class="stat-row" id="reportStats"></div>
+    <div id="reportFindings"></div>
+  </div>
+
+  <!-- AI ADVISOR -->
+  <div class="page" id="page-5">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>AI Security Advisor</h1>
+        <p>Contextual GRC guidance powered by your current assessment data</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Security Q&amp;A Console</h2>
+        <span class="badge badge-info ml-auto">Claude AI Engine</span>
+      </div>
+      <div class="chat-container">
+        <div class="quick-prompts">
+          <span class="q-chip" onclick="qAsk('Summarize my top 3 critical risks and provide a remediation plan')">Top Critical Risks</span>
+          <span class="q-chip" onclick="qAsk('Create a 90-day Azure security remediation roadmap')">90-Day Roadmap</span>
+          <span class="q-chip" onclick="qAsk('What are my SOC 2 Type II compliance gaps?')">SOC 2 Gaps</span>
+          <span class="q-chip" onclick="qAsk('Which Azure controls should I prioritize for GDPR compliance?')">GDPR Controls</span>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="msg msg-ai">
+            <div class="msg-label">Security Advisor</div>
+            Welcome to the SecureCloud GRC AI Advisor. I have full context of your current assessment — assets, risks, active controls, and compliance posture. Ask me anything about your Azure security environment.
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="Ask about risks, remediation steps, compliance requirements..." onkeydown="if(event.key==='Enter') sendMsg()">
+          <button class="btn btn-primary btn-sm" onclick="sendMsg()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const S = {
+  assets: [],
+  risks: [],
+  activeFw: 'NIST CSF',
+  controls: {
+    'MFA & Conditional Access':       { on: false, desc: 'Enforce MFA for all identities; apply risk-based conditional access policies.', mitre: 'T1078', impact: 'High' },
+    'Microsoft Defender for Cloud':   { on: false, desc: 'Unified CSPM and workload protection across Azure services.', mitre: 'T1190', impact: 'High' },
+    'Azure Private Endpoints':        { on: false, desc: 'Eliminate public exposure by routing service access through VNet.', mitre: 'T1133', impact: 'High' },
+    'Encryption at Rest (CMK)':       { on: false, desc: 'Customer-managed keys in Key Vault for disks, databases, and blobs.', mitre: 'T1530', impact: 'Medium' },
+    'RBAC Least Privilege':           { on: false, desc: 'Scope role assignments to minimum required permissions; use PIM.', mitre: 'T1078', impact: 'High' },
+    'Azure WAF + DDoS Standard':      { on: false, desc: 'Layer 7 firewall with volumetric DDoS mitigation at the network edge.', mitre: 'T1498', impact: 'Medium' },
+    'Azure Sentinel (SIEM/SOAR)':     { on: false, desc: 'Behavioral analytics, threat intelligence, and automated playbooks.', mitre: 'T1071', impact: 'High' },
+    'Just-in-Time VM Access':         { on: false, desc: 'Lock down management ports; grant time-bound access on request.', mitre: 'T1021', impact: 'Medium' },
+    'Immutable Backup + DR':          { on: false, desc: 'Write-once backup vaults and geo-redundant disaster recovery.', mitre: 'T1486', impact: 'Medium' },
+    'TLS 1.2+ Policy Enforcement':    { on: false, desc: 'Deny legacy SSL/TLS protocols across all app services and endpoints.', mitre: 'T1557', impact: 'Low' },
+  }
+};
+
+const FW = {
+  'NIST CSF': [
+    {c:'ID.AM — Asset Management', w:14}, {c:'PR.AC — Access Control', w:20},
+    {c:'PR.DS — Data Security', w:15}, {c:'DE.AE — Anomaly Detection', w:14},
+    {c:'RS.RP — Incident Response', w:14}, {c:'RC.RP — Recovery Planning', w:12}, {c:'GV.RM — Risk Management', w:11},
+  ],
+  'ISO 27001': [
+    {c:'A.8 — Asset Management', w:12}, {c:'A.9 — Access Control', w:18},
+    {c:'A.10 — Cryptography', w:12}, {c:'A.12 — Operations Security', w:14},
+    {c:'A.13 — Communications Security', w:12}, {c:'A.16 — Incident Management', w:14}, {c:'A.17 — Business Continuity', w:10}, {c:'A.18 — Compliance', w:8},
+  ],
+  'SOC 2': [
+    {c:'CC6 — Logical Access', w:24}, {c:'CC7 — System Operations', w:20},
+    {c:'CC8 — Change Management', w:14}, {c:'CC9 — Risk Mitigation', w:16},
+    {c:'A1 — Availability', w:14}, {c:'C1 — Confidentiality', w:12},
+  ],
+  'CIS Azure': [
+    {c:'Section 1 — Identity & Access', w:22}, {c:'Section 2 — Security Center', w:18},
+    {c:'Section 3 — Storage Accounts', w:12}, {c:'Section 4 — Database', w:11},
+    {c:'Section 6 — Networking', w:14}, {c:'Section 5 — Logging', w:14}, {c:'Section 7 — VMs', w:9},
+  ],
+  'GDPR': [
+    {c:'Art.25 — Privacy by Design', w:15}, {c:'Art.32 — Security of Processing', w:24},
+    {c:'Art.33 — Breach Notification', w:16}, {c:'Art.35 — DPIA', w:15},
+    {c:'Art.44 — Data Transfers', w:15}, {c:'Art.5 — Data Minimisation', w:15},
+  ],
+  'PCI DSS': [
+    {c:'Req 1 — Network Security', w:14}, {c:'Req 2 — Secure Config', w:12},
+    {c:'Req 3 — Protect Cardholder Data', w:20}, {c:'Req 6 — Secure Systems', w:12},
+    {c:'Req 7 — Restrict Access', w:14}, {c:'Req 10 — Logging', w:14}, {c:'Req 11 — Test Security', w:14},
+  ],
+};
+
+// ── NAVIGATION ────────────────────────────────────────────
+function navigate(n, el) {
+  document.querySelectorAll('.page').forEach((p, i) => p.classList.toggle('active', i === n));
+  document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  if (n === 1) buildMatrix();
+  if (n === 2) renderControls();
+  if (n === 3) renderFw();
+  if (n === 4) renderReport();
+}
+
+// ── ASSETS ────────────────────────────────────────────────
+function addAsset() {
+  const name = document.getElementById('assetName').value.trim();
+  const type = document.getElementById('assetType').value;
+  if (!name || !type) { alert('Asset Name and Type are required.'); return; }
+  S.assets.push({
+    name, type,
+    env:            document.getElementById('assetEnv').value,
+    classification: document.getElementById('assetClass').value,
+    region:         document.getElementById('assetRegion').value,
+    exposed:        document.getElementById('assetExposed').value,
+    notes:          document.getElementById('assetNotes').value.trim(),
+  });
+  clearAssetForm();
+  renderAssets();
+  refreshRiskSel();
+}
+
+function clearAssetForm() {
+  ['assetName','assetNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('assetType').value = '';
+}
+
+function scrollToForm() { document.getElementById('addAssetForm').scrollIntoView({behavior:'smooth'}); }
+
+function loadSampleAssets() {
+  const samples = [
+    {name:'prod-web-vm-001', type:'Virtual Machine', env:'Production', classification:'Internal', region:'East US', exposed:'Yes', notes:'Internet-facing web server'},
+    {name:'prod-sql-db-01', type:'Azure SQL Database', env:'Production', classification:'Restricted / PII', region:'East US', exposed:'No', notes:'Customer PII — GDPR in scope'},
+    {name:'storage-backup-001', type:'Storage Account', env:'DR / Backup', classification:'Confidential', region:'West US 2', exposed:'No', notes:'Backup blobs'},
+    {name:'prod-aks-cluster', type:'Azure Kubernetes Service', env:'Production', classification:'Confidential', region:'North Europe', exposed:'Partial', notes:'Microservices behind load balancer'},
+    {name:'keyvault-prod-01', type:'Key Vault', env:'Production', classification:'Secret', region:'East US', exposed:'No', notes:'Stores CMKs and connection strings'},
+  ];
+  S.assets.push(...samples);
+  renderAssets();
+  refreshRiskSel();
+}
+
+function removeAsset(i) { S.assets.splice(i, 1); renderAssets(); refreshRiskSel(); }
+
+function renderAssets() {
+  const total     = S.assets.length;
+  const exposed   = S.assets.filter(a => a.exposed !== 'No').length;
+  const prod      = S.assets.filter(a => a.env === 'Production').length;
+  const sensitive = S.assets.filter(a => ['Restricted / PII','Secret','Confidential'].includes(a.classification)).length;
+
+  document.getElementById('s-total').textContent    = total;
+  document.getElementById('s-exposed').textContent  = exposed;
+  document.getElementById('s-prod').textContent     = prod;
+  document.getElementById('s-sensitive').textContent = sensitive;
+  document.getElementById('assetCountLabel').textContent = `— ${total} records`;
+
+  const wrap = document.getElementById('assetTableWrap');
+  if (!total) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">☁</div><div class="empty-title">No assets registered</div><div class="empty-sub">Use the form below or load sample data</div></div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Asset Name</th><th>Type</th><th>Environment</th><th>Classification</th><th>Region</th><th>Exposed</th><th></th></tr></thead>
+    <tbody>${S.assets.map((a,i)=>`<tr>
+      <td style="color:var(--text-muted);font-family:var(--font-mono);font-size:12px">${String(i+1).padStart(2,'0')}</td>
+      <td><div class="cell-primary">${a.name}</div>${a.notes?`<div class="cell-secondary">${a.notes}</div>`:''}</td>
+      <td>${a.type}</td>
+      <td><span class="badge ${a.env==='Production'?'badge-critical':a.env==='Staging'?'badge-high':'badge-neutral'}">${a.env}</span></td>
+      <td><span class="badge ${['Restricted / PII','Secret'].includes(a.classification)?'badge-critical':a.classification==='Confidential'?'badge-high':'badge-neutral'}">${a.classification}</span></td>
+      <td style="font-size:12px">${a.region}</td>
+      <td><span class="badge ${a.exposed==='Yes'?'badge-critical':a.exposed==='Partial'?'badge-medium':'badge-low'}">${a.exposed}</span></td>
+      <td><button class="btn btn-danger" onclick="removeAsset(${i})">Remove</button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function refreshRiskSel() {
+  const sel = document.getElementById('riskAsset');
+  sel.innerHTML = S.assets.length
+    ? S.assets.map(a=>`<option>${a.name}</option>`).join('')
+    : '<option value="">— Add assets first —</option>';
+}
+
+// ── RISKS ─────────────────────────────────────────────────
+function addRisk() {
+  if (!S.assets.length) { alert('Register at least one asset before logging risks.'); return; }
+  const l = parseInt(document.getElementById('riskLikelihood').value);
+  const i = parseInt(document.getElementById('riskImpact').value);
+  const score = l * i;
+  const sev = score >= 20 ? 'critical' : score >= 12 ? 'high' : score >= 5 ? 'medium' : 'low';
+  S.risks.push({
+    asset:      document.getElementById('riskAsset').value,
+    threat:     document.getElementById('riskThreat').value,
+    likelihood: l, impact: i, score, severity: sev,
+    vector:     document.getElementById('riskVector').value,
+    control:    document.getElementById('riskControl').value,
+  });
+  const badge = document.getElementById('riskNavBadge');
+  badge.textContent = S.risks.filter(r=>r.severity==='critical'||r.severity==='high').length;
+  badge.style.display = badge.textContent === '0' ? 'none' : '';
+  renderRisks();
+  buildMatrix();
+}
+
+function renderRisks() {
+  const wrap = document.getElementById('riskTableWrap');
+  document.getElementById('riskCountLabel').textContent = `— ${S.risks.length} records`;
+  if (!S.risks.length) { wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">◈</div><div class="empty-title">No risks logged</div><div class="empty-sub">Use the form to add risk entries</div></div>`; return; }
+  wrap.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Asset</th><th>Threat</th><th>Likelihood</th><th>Impact</th><th>Score</th><th>Severity</th><th>Vector</th><th>Controls</th></tr></thead>
+    <tbody>${S.risks.map((r,i)=>`<tr>
+      <td style="color:var(--text-muted);font-family:var(--font-mono);font-size:12px">${String(i+1).padStart(2,'0')}</td>
+      <td><span class="cell-primary">${r.asset}</span></td>
+      <td>${r.threat}</td>
+      <td style="text-align:center;font-family:var(--font-mono)">${r.likelihood}</td>
+      <td style="text-align:center;font-family:var(--font-mono)">${r.impact}</td>
+      <td style="text-align:center;font-family:var(--font-mono);font-weight:700;color:${r.severity==='critical'?'var(--critical)':r.severity==='high'?'var(--high)':r.severity==='medium'?'var(--medium)':'var(--low)'}">${r.score}</td>
+      <td><span class="badge badge-${r.severity}">${r.severity.toUpperCase()}</span></td>
+      <td style="font-size:12px">${r.vector}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${r.control}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function buildMatrix() {
+  const m = document.getElementById('riskMatrix');
+  m.innerHTML = '';
+  for (let row = 0; row < 6; row++) {
+    for (let col = 0; col < 6; col++) {
+      if (row === 5) {
+        const el = document.createElement('div');
+        el.className = 'mx-label';
+        el.textContent = col > 0 ? col : '';
+        m.appendChild(el);
+      } else if (col === 0) {
+        const el = document.createElement('div');
+        el.className = 'mx-label';
+        el.textContent = 5 - row;
+        m.appendChild(el);
+      } else {
+        const impact = 5 - row, likelihood = col;
+        const score = impact * likelihood;
+        const cls = score <= 4 ? 'mx-low' : score <= 9 ? 'mx-medium' : score <= 16 ? 'mx-high' : 'mx-critical';
+        const el = document.createElement('div');
+        el.className = `mx-cell ${cls}`;
+        const matches = S.risks.filter(r => r.impact === impact && r.likelihood === likelihood);
+        if (matches.length) { el.textContent = matches.length; el.classList.add('populated'); el.title = matches.map(r=>r.threat).join(', '); }
+        m.appendChild(el);
+      }
+    }
+  }
+}
+
+// ── CONTROLS ──────────────────────────────────────────────
+function renderControls() {
+  const tbody = document.getElementById('controlTableBody');
+  const keys = Object.keys(S.controls);
+  tbody.innerHTML = keys.map(name => {
+    const c = S.controls[name];
+    const id = `ctrl-${name.replace(/\W+/g,'-')}`;
+    return `<tr>
+      <td><span class="cell-primary">${name}</span></td>
+      <td style="font-size:12px;color:var(--text-secondary);max-width:300px">${c.desc}</td>
+      <td><span class="badge badge-neutral" style="font-family:var(--font-mono)">${c.mitre}</span></td>
+      <td><span class="badge ${c.impact==='High'?'badge-critical':c.impact==='Medium'?'badge-medium':'badge-low'}">${c.impact}</span></td>
+      <td style="text-align:center">
+        <label class="toggle" onclick="toggleCtrl('${name}')">
+          <input type="checkbox" ${c.on?'checked':''} readonly>
+          <div class="toggle-track"></div>
+        </label>
+      </td>
+    </tr>`;
+  }).join('');
+  renderScore();
+}
+
+function toggleCtrl(name) {
+  S.controls[name].on = !S.controls[name].on;
+  renderControls();
+}
+
+function renderScore() {
+  const total   = Object.keys(S.controls).length;
+  const enabled = Object.values(S.controls).filter(c=>c.on).length;
+  const pct     = Math.round(enabled / total * 100);
+  const color   = pct >= 80 ? '#27ae60' : pct >= 55 ? '#e67e22' : '#c0392b';
+
+  document.getElementById('scoreNum').textContent   = pct + '%';
+  document.getElementById('scoreCircle').style.borderColor = color;
+  document.getElementById('scoreNum').style.color   = color;
+  document.getElementById('scoreTitleText').textContent = pct >= 80 ? 'Strong Security Posture' : pct >= 55 ? 'Moderate Security Posture' : 'Weak Security Posture';
+  document.getElementById('scoreSubText').textContent  = `${enabled} of ${total} controls active`;
+
+  document.getElementById('scoreBars').innerHTML = [
+    {label:'Identity & Access', val: S.controls['MFA & Conditional Access'].on && S.controls['RBAC Least Privilege'].on ? 100 : S.controls['MFA & Conditional Access'].on || S.controls['RBAC Least Privilege'].on ? 50 : 0},
+    {label:'Network Security',  val: S.controls['Azure WAF + DDoS Standard'].on && S.controls['Azure Private Endpoints'].on ? 100 : S.controls['Azure WAF + DDoS Standard'].on || S.controls['Azure Private Endpoints'].on ? 50 : 0},
+    {label:'Detection & Response', val: S.controls['Azure Sentinel (SIEM/SOAR)'].on && S.controls['Microsoft Defender for Cloud'].on ? 100 : S.controls['Azure Sentinel (SIEM/SOAR)'].on || S.controls['Microsoft Defender for Cloud'].on ? 50 : 0},
+    {label:'Data Protection',  val: S.controls['Encryption at Rest (CMK)'].on && S.controls['TLS 1.2+ Policy Enforcement'].on ? 100 : S.controls['Encryption at Rest (CMK)'].on || S.controls['TLS 1.2+ Policy Enforcement'].on ? 50 : 0},
+  ].map(b=>`<div class="prog-bar-wrap">
+    <div class="prog-bar-header"><span class="prog-bar-label" style="color:#fff;font-size:11px">${b.label}</span><span class="prog-bar-pct" style="color:var(--gray-400)">${b.val}%</span></div>
+    <div class="prog-bar" style="background:var(--navy-border)"><div class="prog-fill" style="width:${b.val}%;background:${b.val>=80?'#27ae60':b.val>=50?'#e67e22':'#c0392b'}"></div></div>
+  </div>`).join('');
+}
+
+// ── COMPLIANCE ────────────────────────────────────────────
+function selectFw(fw, el) {
+  S.activeFw = fw;
+  document.querySelectorAll('.fw-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderFw();
+}
+
+function renderFw() {
+  const items = FW[S.activeFw];
+  const base  = Object.values(S.controls).filter(c=>c.on).length / Object.keys(S.controls).length;
+  const fwDiv = document.getElementById('fwContent');
+
+  fwDiv.innerHTML = items.map(item => {
+    const pct   = Math.min(94, Math.round(base * item.w * 5.2 + (Math.random()*8|0)));
+    const color = pct >= 70 ? 'var(--low)' : pct >= 45 ? '#e67e22' : 'var(--critical)';
+    return `<div class="prog-bar-wrap">
+      <div class="prog-bar-header">
+        <span class="prog-bar-label">${item.c}</span>
+        <span class="prog-bar-pct" style="color:${color}">${pct}%</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+
+  const overall = Math.min(91, Math.round(base * 82 + 5));
+  const oc = overall >= 70 ? 'var(--low)' : overall >= 45 ? '#e67e22' : 'var(--critical)';
+  fwDiv.innerHTML += `<div style="margin-top:14px;padding:12px 14px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:var(--radius);display:flex;align-items:center;gap:12px;">
+    <div style="font-size:26px;font-weight:700;color:${oc};font-family:var(--font-mono)">${overall}%</div>
+    <div><div style="font-weight:600;font-size:13px">${S.activeFw} — Overall Compliance Score</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${overall>=70?'Approaching compliance — minor gaps remain':overall>=45?'Significant gaps — remediation action required':'Critical gaps — immediate intervention required'}</div></div>
+  </div>`;
+
+  renderGaps();
+}
+
+function renderGaps() {
+  const disabled = Object.entries(S.controls).filter(([,c])=>!c.on);
+  const div = document.getElementById('gapContent');
+  if (!disabled.length) { div.innerHTML = `<p style="color:var(--low);font-size:13px;font-weight:500">✓ All controls active — minimal compliance exposure detected.</p>`; return; }
+  div.innerHTML = `<p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">${disabled.length} control gaps identified. Enable controls in the Control Mapping phase to close these gaps.</p>` +
+    disabled.map(([name, c]) => `<div class="finding">
+      <div class="finding-header">
+        <span class="badge badge-high">GAP</span>
+        <span class="finding-title">${name}</span>
+        <span style="margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${c.mitre}</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-meta">${c.desc}</div>
+        <div class="remediation-block" style="margin-top:8px">
+          <div class="label">Remediation Guidance</div>
+          <div class="remediation-steps">Enable in Azure Security Center or via Azure Policy. Reference MITRE ATT&CK technique ${c.mitre}.</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── REPORT ────────────────────────────────────────────────
+function renderReport() {
+  const counts = {critical:0, high:0, medium:0, low:0};
+  S.risks.forEach(r => counts[r.severity]++);
+  const ctrlPct = Math.round(Object.values(S.controls).filter(c=>c.on).length / Object.keys(S.controls).length * 100);
+
+  document.getElementById('reportStats').innerHTML = [
+    {label:'Critical Risks', val:counts.critical, cls:'critical-card', color:'var(--critical)'},
+    {label:'High Risks',     val:counts.high,     cls:'high-card',     color:'var(--high)'},
+    {label:'Total Assets',   val:S.assets.length, cls:'',              color:'var(--text-primary)'},
+    {label:'Controls Active',val:ctrlPct+'%',     cls:'',              color:'var(--blue-bright)'},
+  ].map(s=>`<div class="stat-card ${s.cls}">
+    <div class="stat-label">${s.label}</div>
+    <div class="stat-value" style="color:${s.color}">${s.val}</div>
+  </div>`).join('');
+
+  const highRisks = S.risks.filter(r=>r.severity==='critical'||r.severity==='high');
+  const fDiv = document.getElementById('reportFindings');
+  if (!highRisks.length) {
+    fDiv.innerHTML = `<div class="card"><div class="card-body"><div class="empty-state"><div class="empty-icon">✓</div><div class="empty-title">No critical or high findings</div><div class="empty-sub">Log risks in Phase 2 to generate findings</div></div></div></div>`;
+    return;
+  }
+  fDiv.innerHTML = `<div class="card"><div class="card-header"><h2>Key Findings & Remediation Plans</h2><span class="subtitle">${highRisks.length} findings requiring attention</span></div><div class="card-body">` +
+    highRisks.map((r,i) => `<div class="finding">
+      <div class="finding-header">
+        <span class="badge badge-${r.severity}">${r.severity.toUpperCase()}</span>
+        <span class="finding-title">${r.threat}</span>
+        <span style="margin-left:6px;font-size:12px;color:var(--text-muted)">on ${r.asset}</span>
+        <span style="margin-left:auto;font-family:var(--font-mono);font-size:12px;font-weight:700;color:${r.severity==='critical'?'var(--critical)':'var(--high)'}">Score: ${r.score}/25</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-meta"><strong>Vector:</strong> ${r.vector} &nbsp;·&nbsp; <strong>Existing Controls:</strong> ${r.control}</div>
+        <div class="remediation-block">
+          <div class="label">Remediation Plan</div>
+          <div class="remediation-steps">${getRemediation(r)}</div>
+        </div>
+      </div>
+    </div>`).join('')
+    + '</div></div>';
+}
+
+function getRemediation(r) {
+  const map = {
+    'Data Exfiltration': '1. Enable Azure Private Endpoints to remove public surface area.\n2. Apply Microsoft Purview DLP policies to sensitive workloads.\n3. Enable Defender for Storage and SQL Threat Detection.\n4. Audit and restrict overly permissive RBAC assignments.',
+    'Unauthorized Access': '1. Enforce MFA and risk-based Conditional Access for all identities.\n2. Implement RBAC least privilege; remove standing high-privilege access.\n3. Enable Just-in-Time VM access for all management ports.\n4. Configure Privileged Identity Management (PIM) for eligible roles.',
+    'Ransomware / Malware': '1. Enable Microsoft Defender for Servers with real-time protection.\n2. Configure immutable Azure Backup vaults (WORM policy).\n3. Implement geo-redundant DR with tested recovery runbooks.\n4. Run Attack Simulator scenarios quarterly.',
+    'DDoS Attack': '1. Enable Azure DDoS Protection Standard on all production VNets.\n2. Deploy Azure WAF (OWASP ruleset) in front of internet endpoints.\n3. Configure Azure Front Door for global traffic distribution.\n4. Define and test DDoS response playbooks in Sentinel.',
+    'Misconfiguration': '1. Enforce Azure Policy with deny effect for non-compliant resources.\n2. Enable Defender for Cloud secure score monitoring and auto-remediation.\n3. Integrate IaC security scanning (Checkov/Terrascan) in CI/CD pipeline.\n4. Schedule monthly configuration audits against CIS Azure Benchmark.',
+    'Insider Threat': '1. Enable UEBA in Microsoft Sentinel for anomaly detection.\n2. Apply Conditional Access with named locations and session policies.\n3. Implement Purview data labeling and comprehensive access logging.\n4. Review and rotate privileged credentials on a 90-day cycle.',
+  };
+  return (map[r.threat] || `1. Review ${r.asset} against CIS Azure Benchmark.\n2. Apply principle of least privilege across all access paths.\n3. Implement network segmentation and micro-segmentation.\n4. Enable Defender for Cloud recommendations for this resource type.`).replace(/\n/g, '<br>');
+}
+
+// ── AI CHAT ───────────────────────────────────────────────
+async function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const msg   = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addMsg('user', msg);
+  const typingEl = addMsg('ai', '', true);
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are a senior cloud security GRC consultant specializing in Microsoft Azure. Respond with precise, professional, actionable advice suitable for enterprise security teams. Use numbered lists for step-by-step guidance. Be concise and technically accurate.\n\nCurrent assessment context:\nAssets: ${S.assets.map(a=>`${a.name}(${a.type},${a.env},${a.classification},exposed:${a.exposed})`).join('; ')||'None'}\nRisks: ${S.risks.map(r=>`${r.threat} on ${r.asset}[${r.severity},score:${r.score}]`).join('; ')||'None'}\nActive Controls (${Object.values(S.controls).filter(c=>c.on).length}/${Object.keys(S.controls).length}): ${Object.entries(S.controls).filter(([,c])=>c.on).map(([n])=>n).join(', ')||'None'}`,
+        messages: [{role:'user', content:msg}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(b=>b.text||'').join('') || 'Unable to retrieve response.';
+    typingEl.innerHTML = `<div class="msg-label">Security Advisor</div>${text.replace(/\n/g,'<br>')}`;
+  } catch(e) {
+    typingEl.innerHTML = `<div class="msg-label">Error</div>Connection error. Please check your network and try again.`;
+  }
+}
+
+function addMsg(role, text, typing=false) {
+  const msgs = document.getElementById('chatMessages');
+  const el   = document.createElement('div');
+  el.className = `msg msg-${role}`;
+  if (typing) {
+    el.innerHTML = `<div class="msg-label">Security Advisor</div><div class="typing"><span></span><span></span><span></span></div>`;
+  } else {
+    el.textContent = text;
+  }
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+  return el;
+}
+
+function qAsk(q) {
+  document.getElementById('chatInput').value = q;
+  sendMsg();
+  // scroll to chat
+  document.getElementById('chatMessages').scrollIntoView({behavior:'smooth'});
+}
+
+// ── INIT ──────────────────────────────────────────────────
+buildMatrix();
+refreshRiskSel();
+</script>
+</body>
+</html>
